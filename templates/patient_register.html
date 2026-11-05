@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+
+{% block title %}Patient registration{% endblock %}
+
+{% block main %}
+<section class="auth-card">
+    <p class="eyebrow">Patients</p>
+    <h1>Create your patient account</h1>
+    <p class="lead-text">Register to book an appointment after scanning your doctor's QR code.</p>
+
+    <form action="/pateint/register" method="post" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="mb-3">
+            {{ form.name.label(class="form-label") }}
+            {{ form.name(class="form-control", autocomplete="name") }}
+            {% for error in form.name.errors %}
+                <div class="form-error">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.username.label(class="form-label") }}
+            {{ form.username(class="form-control", autocomplete="username") }}
+            {% for error in form.username.errors %}
+                <div class="form-error">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.email.label(class="form-label") }}
+            {{ form.email(class="form-control", type="email", autocomplete="email") }}
+            {% for error in form.email.errors %}
+                <div class="form-error">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-4">
+            {{ form.password.label(class="form-label") }}
+            {{ form.password(class="form-control", autocomplete="new-password") }}
+            {% for error in form.password.errors %}
+                <div class="form-error">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <button class="btn btn-accent w-100" type="submit">Create patient account</button>
+    </form>
+
+    <p class="form-footer">Already registered? <a href="/patient/login">Log in</a></p>
+</section>
+{% endblock %}

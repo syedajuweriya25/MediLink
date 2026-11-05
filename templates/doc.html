@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block title %}Doctor login{% endblock %}
+
+{% block main %}
+<section class="auth-card">
+    <p class="eyebrow">Doctors</p>
+    <h1>Log in to your dashboard</h1>
+    <p class="lead-text">Enter the username and password you used when you registered.</p>
+
+    <form action="/" method="post" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="mb-3">
+            {{ form.username.label(class="form-label") }}
+            {{ form.username(class="form-control", autocomplete="username") }}
+            {% for error in form.username.errors %}
+                <div class="form-error">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-4">
+            {{ form.password.label(class="form-label") }}
+            {{ form.password(class="form-control", autocomplete="current-password") }}
+            {% for error in form.password.errors %}
+                <div class="form-error">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <button class="btn btn-primary w-100" type="submit">Log in</button>
+    </form>
+
+    <p class="form-footer">New doctor? <a href="/doctor/register">Create an account</a></p>
+</section>
+{% endblock %}

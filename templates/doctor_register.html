@@ -1,0 +1,59 @@
+{% extends "layout.html" %}
+
+{% block title %}Doctor registration{% endblock %}
+
+{% block main %}
+<section class="auth-card">
+    <p class="eyebrow">Doctors</p>
+    <h1>Create your doctor account</h1>
+    <p class="lead-text">Register to manage appointment slots and share a QR code with patients.</p>
+
+    <form action="/doctor/register" method="post" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="mb-3">
+            {{ form.name.label(class="form-label") }}
+            {{ form.name(class="form-control", autocomplete="name") }}
+            {% for error in form.name.errors %}
+                <div class="form-error">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.username.label(class="form-label") }}
+            {{ form.username(class="form-control", autocomplete="username") }}
+            {% for error in form.username.errors %}
+                <div class="form-error">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.email.label(class="form-label") }}
+            {{ form.email(class="form-control", type="email", autocomplete="email") }}
+            {% for error in form.email.errors %}
+                <div class="form-error">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.password.label(class="form-label") }}
+            {{ form.password(class="form-control", autocomplete="new-password") }}
+            {% for error in form.password.errors %}
+                <div class="form-error">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-4">
+            {{ form.info.label(class="form-label") }}
+            {{ form.info(class="form-control", placeholder="Speciality, clinic, or a short introduction") }}
+            {% for error in form.info.errors %}
+                <div class="form-error">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <button class="btn btn-primary w-100" type="submit">Create doctor account</button>
+    </form>
+
+    <p class="form-footer">Already registered? <a href="/">Log in</a></p>
+</section>
+{% endblock %}

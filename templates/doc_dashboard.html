@@ -1,0 +1,127 @@
+{% extends "layout.html" %}
+
+{% block title %}Doctor dashboard{% endblock %}
+
+{% block main %}
+<section class="page-header">
+    <p class="eyebrow">Doctor dashboard</p>
+    <h1>Welcome, {{ doctor.name }}</h1>
+    <p class="lead-text">Add, edit, or delete slots for a date. Booked appointments appear in green. Join becomes available at the slot time.</p>
+</section>
+
+{% if active_appointment %}
+    <section class="join-panel" aria-live="polite">
+        <h2>Consultation in progress</h2>
+        <p>You have joined the {{ active_appointment.time }} appointment{% if active_appointment.patient_name %} with {{ active_appointment.patient_name }}{% endif %}.</p>
+        {% if active_appointment.illness %}
+            <p>Reason for visit: {{ active_appointment.illness }}</p>
+        {% endif %}
+    </section>
+{% endif %}
+
+<div class="dashboard-grid">
+    <section class="panel">
+        <h2>Appointment slots</h2>
+
+        <form class="filter-form" method="get" action="/dashboard/{{ doctor.id }}">
+            <div>
+                <label class="form-label" for="filter-date">Show a particular date</label>
+                <input class="form-control" id="filter-date" type="date" name="date" value="{{ selected_date }}">
+            </div>
+            <button class="btn btn-primary" type="submit">Show date</button>
+            {% if selected_date %}
+                <a class="btn btn-outline-teal" href="/dashboard/{{ doctor.id }}">Show all</a>
+            {% endif %}
+        </form>
+
+        <form class="add-slot-form" action="/dashboard/{{ doctor.id }}" method="post">
+            {{ form.hidden_tag() }}
+            <input type="hidden" name="action" value="add">
+            <h3>Add a slot</h3>
+            <div class="slot-form-row">
+                <div>
+                    <label class="form-label" for="add-date">Date</label>
+                    <input class="form-control" id="add-date" type="date" name="date" value="{{ selected_date }}" required>
+                </div>
+                <div>
+                    <label class="form-label" for="add-time">Time</label>
+                    <input class="form-control" id="add-time" type="time" name="time" required>
+                </div>
+                <button class="btn btn-accent" type="submit">Add slot</button>
+            </div>
+        </form>
+
+        {% if not slots %}
+            <p class="lead-text">No slots{% if selected_date %} for {{ selected_date }}{% endif %} yet. Add one above.</p>
+        {% endif %}
+
+        {% set ns = namespace(date=None) %}
+        {% for slot in slots %}
+            {% if slot.date != ns.date %}
+                {% set ns.date = slot.date %}
+                <h3 class="date-heading">{{ slot.date }}</h3>
+            {% endif %}
+
+            <article class="slot-card slot-card--{{ slot.status }}">
+                <div class="slot-card-main">
+                    <p class="slot-time">{{ slot.time }}</p>
+                    <p class="slot-status">{{ slot.status|capitalize }}</p>
+                    {% if slot.status == "booked" %}
+                        <p class="slot-meta">
+                            {% if slot.patient_name %}Patient: {{ slot.patient_name }}{% endif %}
+                            {% if slot.illness %} · {{ slot.illness }}{% endif %}
+                        </p>
+                    {% endif %}
+                </div>
+
+                <div class="slot-card-actions">
+                    {% if slot.status == "booked" %}
+                        <form action="/dashboard/{{ doctor.id }}" method="post">
+                            {{ form.hidden_tag() }}
+                            <input type="hidden" name="action" value="join">
+                            <input type="hidden" name="slot_id" value="{{ slot.id }}">
+                            <button class="btn btn-join" type="submit" {% if not slot.is_current %}disabled{% endif %}>
+                                Join
+                            </button>
+                        </form>
+                    {% else %}
+                        <form class="edit-slot-form" action="/dashboard/{{ doctor.id }}" method="post">
+                            {{ form.hidden_tag() }}
+                            <input type="hidden" name="action" value="edit">
+                            <input type="hidden" name="slot_id" value="{{ slot.id }}">
+                            <label class="visually-hidden" for="date-{{ slot.id }}">Date</label>
+                            <input class="form-control" id="date-{{ slot.id }}" type="date" name="date" value="{{ slot.date }}" required>
+                            <label class="visually-hidden" for="time-{{ slot.id }}">Time</label>
+                            <input class="form-control" id="time-{{ slot.id }}" type="time" name="time" value="{{ slot.time }}" required>
+                            <label class="visually-hidden" for="status-{{ slot.id }}">Status</label>
+                            <select class="form-select" id="status-{{ slot.id }}" name="status">
+                                <option value="available"{% if slot.status == "available" %} selected{% endif %}>Available</option>
+                                <option value="unavailable"{% if slot.status == "unavailable" %} selected{% endif %}>Unavailable</option>
+                            </select>
+                            <button class="btn btn-primary" type="submit">Save</button>
+                        </form>
+                        <form action="/dashboard/{{ doctor.id }}" method="post">
+                            {{ form.hidden_tag() }}
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="slot_id" value="{{ slot.id }}">
+                            <button class="btn btn-outline-danger" type="submit">Delete</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </article>
+        {% endfor %}
+    </section>
+
+    <aside class="panel qr-panel">
+        <h2>Your QR code</h2>
+        <p class="lead-text">Patients can scan this to open your booking page.</p>
+        {% if doctor.qr_filename and doctor.qr_filename != "pending" %}
+            <img class="qr-image" src="/static/{{ doctor.qr_filename }}" alt="QR code for {{ doctor.name }}">
+            <a class="btn btn-accent w-100" href="/static/{{ doctor.qr_filename }}" download="{{ doctor.qr_filename }}">Download QR code</a>
+            <p class="form-footer"><a href="/doctor/{{ doctor.id }}">Open public profile</a></p>
+        {% else %}
+            <p>A QR code has not been generated yet.</p>
+        {% endif %}
+    </aside>
+</div>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block title %}Patient login{% endblock %}
+
+{% block main %}
+<section class="auth-card">
+    <p class="eyebrow">Patients</p>
+    <h1>Log in to book an appointment</h1>
+    <p class="lead-text">Use your patient username and password. After login you will return to the doctor page from the QR code if you scanned one.</p>
+
+    <form action="/patient/login" method="post" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="mb-3">
+            {{ form.username.label(class="form-label") }}
+            {{ form.username(class="form-control", autocomplete="username") }}
+            {% for error in form.username.errors %}
+                <div class="form-error">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-4">
+            {{ form.password.label(class="form-label") }}
+            {{ form.password(class="form-control", autocomplete="current-password") }}
+            {% for error in form.password.errors %}
+                <div class="form-error">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <button class="btn btn-accent w-100" type="submit">Log in</button>
+    </form>
+
+    <p class="form-footer">New patient? <a href="/pateint/register">Create an account</a></p>
+</section>
+{% endblock %}

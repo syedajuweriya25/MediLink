@@ -1,0 +1,80 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ doctor.name }}{% endblock %}
+
+{% block main %}
+<section class="page-header">
+    <p class="eyebrow">Doctor profile</p>
+    <h1>Dr. {{ doctor.name }}</h1>
+    {% if doctor.info %}
+        <p class="lead-text">{{ doctor.info }}</p>
+    {% else %}
+        <p class="lead-text">Choose an available time to book an appointment.</p>
+    {% endif %}
+    {% if not patient_id %}
+        <p>
+            <a class="btn btn-accent" href="/patient/login?doctor_id={{ doctor.id }}">Patient login</a>
+            <a class="btn btn-primary" href="/pateint/register">Create a patient account</a>
+        </p>
+    {% endif %}
+</section>
+
+{% if active_appointment %}
+    <section class="join-panel" aria-live="polite">
+        <h2>Your appointment is in progress</h2>
+        <p>You have joined your {{ active_appointment.date }} appointment at {{ active_appointment.time }} with Dr. {{ doctor.name }}.</p>
+    </section>
+{% endif %}
+
+<section class="panel">
+    <h2>Appointment slots</h2>
+    {% if not slots %}
+        <p class="lead-text">This doctor has not added any slots yet.</p>
+    {% endif %}
+
+    {% set ns = namespace(date=None) %}
+    {% for slot in slots %}
+        {% if slot.date != ns.date %}
+            {% set ns.date = slot.date %}
+            <h3 class="date-heading">{{ slot.date }}</h3>
+        {% endif %}
+
+        <article class="slot-card slot-card--{{ slot.status }}{% if slot.is_mine %} slot-card--mine{% endif %}">
+            <div class="slot-card-main">
+                <p class="slot-time">{{ slot.time }}</p>
+                {% if slot.is_mine %}
+                    <p class="slot-status">Your appointment</p>
+                {% else %}
+                    <p class="slot-status">{{ slot.status|capitalize }}</p>
+                {% endif %}
+            </div>
+
+            <div class="slot-card-actions">
+                {% if slot.is_mine %}
+                    <form action="/doctor/{{ doctor.id }}" method="post">
+                        {{ form.hidden_tag() }}
+                        <input type="hidden" name="action" value="join">
+                        <input type="hidden" name="slot_id" value="{{ slot.id }}">
+                        <button class="btn btn-join" type="submit" {% if not slot.is_current %}disabled{% endif %}>
+                            Join
+                        </button>
+                    </form>
+                {% elif slot.status == "available" and not slot.is_past %}
+                    {% if patient_id %}
+                        <form class="book-form" action="/doctor/{{ doctor.id }}" method="post">
+                            {{ form.hidden_tag() }}
+                            <input type="hidden" name="action" value="book">
+                            <input type="hidden" name="slot_id" value="{{ slot.id }}">
+                            <label class="visually-hidden" for="illness-{{ slot.id }}">Reason for visit (optional)</label>
+                            <input class="form-control" id="illness-{{ slot.id }}" type="text" name="illness" maxlength="200" placeholder="Reason for visit (optional)">
+                            <button class="btn btn-accent" type="submit">Book</button>
+                        </form>
+                    {% else %}
+                        <a class="btn btn-accent" href="/patient/login?doctor_id={{ doctor.id }}">Log in to book</a>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </article>
+    {% endfor %}
+</section>
+{% endblock %}
