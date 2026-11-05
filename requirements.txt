@@ -1,3 +1,4 @@
 flask
 qrcode
 flask-wtf
+gunicorn==23.0.0
