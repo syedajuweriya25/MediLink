@@ -1,4 +1,7 @@
-flask
+Flask
+Flask-Session
+Flask-WTF
+WTForms
+email-validator
 qrcode
-flask-wtf
 gunicorn==23.0.0
